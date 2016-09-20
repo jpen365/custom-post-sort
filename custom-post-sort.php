@@ -72,15 +72,3 @@ function jpen_custom_post_order_value( $column, $post_id ){
   }
 }
 add_action( 'manage_posts_custom_column' , 'jpen_custom_post_order_value' , 10 , 2 );
-
-
-/* Use pre_get_posts to sort by post_meta_data */
-
-function jpen_custom_post_order_sort( $query ){
-  if ( is_home() ){
-    $query->set( 'orderby', 'meta_value' );
-    $query->set( 'meta_key', '_custom_post_order' );
-    $query->set( 'order' , 'ASC' );
-  }
-}
-add_action( 'pre_get_posts' , 'jpen_custom_post_order_sort' );
