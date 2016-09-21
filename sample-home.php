@@ -98,11 +98,11 @@ wp_reset_postdata();
  *******************/ ?>
 
 <!-- add next/previous navigation -->
-<ul class="pager">
-  <li class="previous">
+<ul>
+  <li>
     <?php next_posts_link( '&larr; Older' ); ?>
   </li>
-  <li class="next">
+  <li>
     <?php previous_posts_link( 'Newer &rarr;' ); ?>
   </li>
 </ul>
