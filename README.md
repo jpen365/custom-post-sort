@@ -54,9 +54,11 @@ if ( $query->have_posts() ) {
 } ?>
 ```
 
-This query could be used for a [custom page template](https://developer.wordpress.org/themes/template-files-section/page-template-files/page-templates/#creating-custom-page-templates-for-global-use) or to populate a list of posts in a [custom sidebar widget](https://codex.wordpress.org/Widgets_API#Developing_Widgets).
+The arguments passed to the `WP_query` class could also include additional criteria, such as categories (`'cat' => '#'`) or tags (`'tag' => 'tag_slug'`), to create an ordered list of posts limited to one or more categories and tags.
 
-One way to make the custom sort even more useful would be to create a custom page template that includes two `WP_Query` objects:
+The query could be used as the basis for a [custom page template](https://developer.wordpress.org/themes/template-files-section/page-template-files/page-templates/#creating-custom-page-templates-for-global-use) or to populate a list of posts in a [custom sidebar widget](https://codex.wordpress.org/Widgets_API#Developing_Widgets).
+
+Another way to use the custom sort is to create a custom page template that includes two `WP_Query` objects:
 
 - The first to query for posts that possess a custom post order value.
 - The second to query for other posts.
@@ -109,8 +111,10 @@ if ( $query1->have_posts() ) {
 
 $args2 = array(
   'post_type' => 'post',
+  'nopaging' => 'true',
   'orderby' => 'date',
-  'order' => 'DESC'
+  'order' => 'DESC',
+
 );
 
 $query2 = new WP_query ( $args2 );
@@ -135,4 +139,6 @@ if ( $query2->have_posts() ) {
 } ?>
 ```
 
-Note that when you add multiple loops to a single page template it becomes necessary to manually manipulate pagination. [Learn more](http://wordpress.stackexchange.com/questions/108679/wp-query-pagination-on-multiple-loop-page-breaks-wp-or-doesnt-show-up).
+Note that standard pagination breaks down if you use more than on custom loop, and it becomes necessary to manually manipulate pagination. [Learn more](http://wordpress.stackexchange.com/questions/108679/wp-query-pagination-on-multiple-loop-page-breaks-wp-or-doesnt-show-up).
+
+In addition, take a loop at *sample-home.php* for an example of a multiple loop template that displays custom sorted posts first, standard sorted posts second, and includes pagination for the second loop and not the first.
