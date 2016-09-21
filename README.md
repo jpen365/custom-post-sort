@@ -74,36 +74,43 @@ For example:
  *  Returns posts with a custom post order value
  */
 
-$args1 = array(
-  'post_type' => 'post',
-  'meta_key' => '_custom_post_order',
-  'orderby' => 'meta_value',
-  'order' => 'ASC'
-);
+// First, determine if on the first page of posts
+// If on first page, run query to display posts with custom sort first
 
-$query1 = new WP_query ( $args1 );
+$paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
+if(1 == $paged) :
 
-if ( $query1->have_posts() ) {
-  while ($query1->have_posts() ) {
-    $query1->the_post(); 
+  $args1 = array(
+    'post_type' => 'post',
+    'meta_key' => '_custom_post_order',
+    'orderby' => 'meta_value',
+    'order' => 'ASC'
+  );
 
-    if ( !empty(get_post_meta( $post->ID, '_custom_post_order', true )) ) : ?>
+  $query1 = new WP_query ( $args1 );
 
-      <div>
-      <?php the_title( sprintf( '<h2 class="entry-title"><a href="%s" rel="bookmark">', esc_url( get_permalink() ) ), '</a></h2>' ); ?>
-      <?php the_excerpt(); ?>
-      <a href="<?php the_permalink(); ?>">Read More</a>
-      </div>
-      <hr>
-      <!--insert additional code for rendering posts-->
+  if ( $query1->have_posts() ) :
+    while ($query1->have_posts() ) :
+      $query1->the_post(); 
 
-<?php 
-    endif; }
-  wp_reset_postdata();
-} ?>
+      // This if statement will skip posts that were assigned a custom sort value and then had that value removed 
+      if ( !empty(get_post_meta( $post->ID, '_custom_post_order', true )) ) :
 
+        // Display the custom sorted posts ?>
+        <div>
+        <?php the_title( sprintf( '<h2 class="entry-title"><a href="%s" rel="bookmark">', esc_url( get_permalink() ) ), '</a></h2>' ); ?>
+        <?php the_excerpt(); ?>
+        <a href="<?php the_permalink(); ?>">Read More</a>
+        </div>
+        <hr>
+        <!--insert additional code for rendering posts--><?php
+ 
+      endif; // End displaying custom sorted posts
+    endwhile; // End looping through custom sorted posts
+  endif; // End loop 1
+  wp_reset_postdata(); // Set up post data for next loop
+endif; // End checking for first page
 
-<?php
 /*  
  *  Second Loop 
  *  Returns all posts except those in the list above
@@ -111,34 +118,38 @@ if ( $query1->have_posts() ) {
 
 $args2 = array(
   'post_type' => 'post',
-  'nopaging' => 'true',
   'orderby' => 'date',
   'order' => 'DESC',
-
+  'paged' => $paged
 );
 
-$query2 = new WP_query ( $args2 );
+// For pagination to work, must make temporary use of global $wp_query variable
+$temp = $wp_query;
+$wp_query = null;
+$wp_query = new WP_query ( $args2 );
 
-if ( $query2->have_posts() ) {
-  while ($query2->have_posts() ) {
-    $query2->the_post();
+if ( $wp_query->have_posts() ) :
+  while ($wp_query->have_posts() ) :
+    $wp_query->the_post();
 
-    if ( !empty(get_post_meta( $post->ID, '_custom_post_order', true )) ) { continue; } ?>
+      // Skip posts with custom sort value
+      if ( !empty(get_post_meta( $post->ID, '_custom_post_order', true )) ) { continue; }
 
+      // Display the standard sorted posts ?>
       <div>
       <?php the_title( sprintf( '<h2 class="entry-title"><a href="%s" rel="bookmark">', esc_url( get_permalink() ) ), '</a></h2>' ); ?>
       <?php the_excerpt(); ?>
       <a href="<?php the_permalink(); ?>">Read More</a>
       </div>
       <hr>
-      <!--insert additional code for rendering posts-->
-
-<?php 
-    }
-  wp_reset_postdata();
-} ?>
+      <!--insert additional code for rendering posts--><?php
+    
+  endwhile; // End looping through standard sorted posts
+endif; // End loop 2
+wp_reset_postdata();
+?>
 ```
 
-Note that standard pagination breaks down if you use more than on custom loop, and it becomes necessary to manually manipulate pagination. [Learn more](http://wordpress.stackexchange.com/questions/108679/wp-query-pagination-on-multiple-loop-page-breaks-wp-or-doesnt-show-up).
+Note that standard pagination breaks down if you use more than on custom loop, and it becomes necessary to manually manipulate the `$wp_query` variable. [Learn more](http://wordpress.stackexchange.com/questions/108679/wp-query-pagination-on-multiple-loop-page-breaks-wp-or-doesnt-show-up).
 
-In addition, take a loop at *sample-home.php* for an example of a multiple loop template that displays custom sorted posts first, standard sorted posts second, and includes pagination for the second loop and not the first.
+In addition, take a loop at *sample-home.php* for an example of how the multiple-loop query could be added to a page template.
