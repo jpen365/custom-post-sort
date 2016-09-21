@@ -31,7 +31,6 @@ function jpen_custom_post_order( $post ) {
   $current_pos = get_post_meta( $post->ID, '_custom_post_order', true); ?>
   <p>Enter the position at which you would like the post to appear. For exampe, post "1" will appear first, post "2" second, and so forth.</p>
   <p><input type="number" name="pos" value="<?php echo $current_pos; ?>" /></p>
-  <p>Posts that are not assigned a number will appear after numbered posts and will be sorted by date of publication.</p>
   <?php
 }
 
